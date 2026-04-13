@@ -40,7 +40,7 @@ There are two ways to run clash depending on what you're doing:
 ### Install (use clash in your day-to-day work)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/empathic/clash/main/install.sh | bash
+curl https://raw.githubusercontent.com/empathic/clash/main/install.sh | bash
 clash init
 claude
 ```

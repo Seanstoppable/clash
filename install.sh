@@ -9,11 +9,12 @@ set -euo pipefail
 
 REPO="empathic/clash"
 INSTALL_DIR="${CLASH_INSTALL_DIR:-$HOME/.local/bin}"
+TMPDIR_CLEANUP=""
 
 main() {
     check_dependencies
 
-    local os arch target version tmpdir
+    local os arch target version
     os="$(detect_os)"
     arch="$(detect_arch)"
     target="$(resolve_target "$os" "$arch")"
@@ -21,11 +22,11 @@ main() {
 
     echo "Installing clash ${version} (${target}) to ${INSTALL_DIR}..."
 
-    tmpdir="$(mktemp -d)"
-    trap 'rm -rf "$tmpdir"' EXIT
+    TMPDIR_CLEANUP="$(mktemp -d)"
+    trap 'rm -rf "$TMPDIR_CLEANUP"' EXIT
 
-    download_and_verify "$version" "$target" "$tmpdir"
-    install_binary "$tmpdir"
+    download_and_verify "$version" "$target" "$TMPDIR_CLEANUP"
+    install_binary "$TMPDIR_CLEANUP"
 
     echo "Installed clash to ${INSTALL_DIR}/clash"
     check_path
