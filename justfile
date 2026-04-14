@@ -94,6 +94,9 @@ release VERSION:
     # and [workspace.dependencies] path entries)
     cargo release version "$new_version" --execute --no-confirm
 
+    # Sync npm package versions
+    bash clash-npm/scripts/sync-version.sh "$new_version"
+
     # Freeze site docs
     cd site && bun run freeze "$tag" && cd ..
 
