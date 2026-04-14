@@ -133,22 +133,7 @@ jobs:
           bash clash-npm/scripts/prepare-platform.sh x86_64-unknown-linux-musl clash-npm/platforms/linux-x64
           bash clash-npm/scripts/prepare-platform.sh aarch64-unknown-linux-gnu clash-npm/platforms/linux-arm64
 
-      - name: Publish platform packages
+      - name: Publish npm packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          cd clash-npm/platforms/darwin-arm64 && npm publish --access public && cd ../../..
-          cd clash-npm/platforms/linux-x64 && npm publish --access public && cd ../../..
-          cd clash-npm/platforms/linux-arm64 && npm publish --access public && cd ../../..
-
-      - name: Publish main package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          cd clash-npm && npm publish --access public && cd ..
-
-      - name: Publish Pi extension package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          cd clash-pi && npm publish --access public && cd ..
+        run: bash clash-npm/scripts/publish-all.sh

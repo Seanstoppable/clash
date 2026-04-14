@@ -14,5 +14,11 @@ if [ ! -f "$TARBALL" ]; then
 fi
 
 tar xzf "$TARBALL" -C "$PLATFORM_DIR"
+
+if [ ! -f "$PLATFORM_DIR/clash" ]; then
+  echo "ERROR: clash binary not found in $PLATFORM_DIR after extraction"
+  exit 1
+fi
+
 chmod 755 "$PLATFORM_DIR/clash"
 echo "Prepared $PLATFORM_DIR/clash from $TARBALL"

@@ -23,19 +23,28 @@ export default function (pi: ExtensionAPI) {
         timeout: HOOK_TIMEOUT,
       });
     } catch (err: any) {
-      if (!clashMissing && err.code === "ENOENT") {
-        clashMissing = true;
+      if (err.code === "ENOENT") {
+        if (!clashMissing) {
+          clashMissing = true;
+          console.error(
+            "[clash] WARNING: clash binary not found on PATH. " +
+              "Policy enforcement is disabled for this session. " +
+              "Install clash: npm install -g @empathic/clash"
+          );
+        }
+      } else {
         console.error(
-          "[clash] WARNING: clash binary not found on PATH. " +
-            "Policy enforcement is disabled for this session. " +
-            "Install clash: npm install -g @empathic/clash"
+          `[clash] hook error (${subcommand}): ${err.message || err}`
         );
       }
       return null;
     }
   }
 
-  pi.on("session_start", async (_event, _ctx) => {
+  pi.on("session_start", async (event, _ctx) => {
+    if (!sessionId && event?.sessionId) {
+      sessionId = `pi-${event.sessionId}`;
+    }
     runHook(
       "session-start",
       JSON.stringify({
