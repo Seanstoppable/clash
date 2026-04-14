@@ -51,6 +51,20 @@ This downloads the latest release binary to `~/.local/bin/` (Apple Silicon Mac, 
 cargo install clash
 ```
 
+Or install from npm (same platform support — Apple Silicon Mac, Linux x86_64, Linux aarch64):
+
+```bash
+npm install -g @empathic/clash
+```
+
+For users of the [Pi agent framework](https://github.com/badlogic/pi-mono), install the clash extension in one step:
+
+```bash
+pi install npm:@empathic/clash-pi
+```
+
+This installs both the clash binary and a Pi extension that enforces your clash policy on every tool call.
+
 `clash init` imports permissions from your coding agent's existing configuration and generates a matching Clash policy. It also installs the agent plugin, the status line, and prints next steps. Use `clash init --no-import` to skip policy generation and just install hooks. After init, every `claude` session automatically loads clash.
 
 If you have the repo checked out, you can also use `just install` which registers the plugin from the local source tree instead of GitHub.
