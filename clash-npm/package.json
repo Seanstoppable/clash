@@ -1,0 +1,26 @@
+{
+  "name": "@empathic/clash",
+  "version": "0.6.2",
+  "description": "Command Line Agent Safety Harness — policy enforcement for AI coding agents",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/empathic/clash"
+  },
+  "bin": {
+    "clash": "bin/clash"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "README.md"
+  ],
+  "optionalDependencies": {
+    "@empathic/clash-darwin-arm64": "0.6.2",
+    "@empathic/clash-linux-x64": "0.6.2",
+    "@empathic/clash-linux-arm64": "0.6.2"
+  }
+}
