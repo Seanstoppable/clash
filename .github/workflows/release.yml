@@ -108,32 +108,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy site/_site --project-name=clash-site
-
-  npm-publish:
-    name: Publish npm packages
-    needs: [build, release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Prepare platform binaries
-        run: |
-          bash clash-npm/scripts/prepare-platform.sh aarch64-apple-darwin clash-npm/platforms/darwin-arm64
-          bash clash-npm/scripts/prepare-platform.sh x86_64-unknown-linux-musl clash-npm/platforms/linux-x64
-          bash clash-npm/scripts/prepare-platform.sh aarch64-unknown-linux-gnu clash-npm/platforms/linux-arm64
-
-      - name: Publish npm packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: bash clash-npm/scripts/publish-all.sh

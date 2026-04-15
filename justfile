@@ -113,6 +113,12 @@ release VERSION:
     gh pr create --title "chore: release ${tag}" --body "Version bump and frozen docs for ${tag}" --fill
     gh pr merge "$branch" --merge --auto
 
+# Publish the current version's npm packages. Run after CI has built and
+# uploaded release binaries to GitHub. Requires `npm login` with publish
+# rights to the @empathic scope.
+publish-npm:
+    bash clash-npm/scripts/publish-all.sh
+
 # Fast targeted testing for a specific module (default: all clash lib tests)
 quick MODULE="":
     cargo test -p clash --lib {{ MODULE }}
