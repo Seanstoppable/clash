@@ -210,6 +210,21 @@ const TOOL_ALIASES: &[ToolAlias] = &[
             (AgentKind::OpenCode, "websearch"),
         ],
     },
+    ToolAlias {
+        canonical: "ask",
+        internal: "AskUserQuestion",
+        agent_names: &[
+            (AgentKind::Claude, "AskUserQuestion"),
+            (AgentKind::Copilot, "ask_user"),
+        ],
+    },
+    ToolAlias {
+        canonical: "report_intent",
+        internal: "ReportIntent",
+        agent_names: &[
+            (AgentKind::Copilot, "report_intent"),
+        ],
+    },
 ];
 
 /// Given an agent's native tool name, return the internal (Claude-style) name.
