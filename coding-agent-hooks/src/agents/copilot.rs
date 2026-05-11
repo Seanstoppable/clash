@@ -41,7 +41,10 @@ impl HookProtocol for CopilotProtocol {
             hook_event_name: json_str_any(raw, &["hook_event_name"]).to_string(),
             tool_name: resolved,
             tool_input,
-            tool_use_id: raw.get("toolCallId").and_then(|v| v.as_str()).map(String::from),
+            tool_use_id: raw
+                .get("toolCallId")
+                .and_then(|v| v.as_str())
+                .map(String::from),
             tool_response: json_value_any(raw, &["tool_response", "toolResponse"]),
             agent: Some(AgentKind::Copilot),
             original_tool_name: Some(original),
