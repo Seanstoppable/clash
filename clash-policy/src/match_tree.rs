@@ -645,10 +645,20 @@ pub(crate) fn parse_bash_bin_args(parts: &[&str]) -> (String, Vec<String>) {
     }
 
     match parts.get(i) {
-        Some(bin) => (
-            bin.to_string(),
-            parts[i + 1..].iter().map(|s| s.to_string()).collect(),
-        ),
+        Some(bin) => {
+            // Normalize the binary: strip leading `./` and extract the filename
+            // from paths (e.g. `./gradlew` → `gradlew`, `/usr/bin/git` → `git`)
+            // so policy rules match regardless of how the binary is invoked.
+            let bin_normalized = std::path::Path::new(bin)
+                .file_name()
+                .and_then(|f| f.to_str())
+                .unwrap_or(bin)
+                .to_string();
+            (
+                bin_normalized,
+                parts[i + 1..].iter().map(|s| s.to_string()).collect(),
+            )
+        }
         None => (String::new(), vec![]),
     }
 }
@@ -687,6 +697,16 @@ fn transparent_prefix_skip(cmd: &str, rest: &[&str]) -> Option<usize> {
                 Some(flags + 1)
             } else {
                 Some(flags)
+            }
+        }
+        // `cd /path && real_command ...` — skip the cd and the `&&` separator,
+        // then evaluate the actual command. Common pattern from Copilot CLI
+        // which prepends `cd $PWD &&` to ensure correct working directory.
+        "cd" => {
+            if let Some(amp_pos) = rest.iter().position(|t| *t == "&&") {
+                Some(amp_pos + 1)
+            } else {
+                None
             }
         }
         _ => None,
@@ -1819,6 +1839,50 @@ mod tests {
         let input4 = serde_json::json!({"command": "env RUST_BACKTRACE=1 cargo test"});
         let ctx4 = QueryContext::from_tool("Bash", &input4);
         assert_eq!(ctx4.args[0], "cargo");
+    }
+
+    #[test]
+    fn cd_prefix_stripped_in_bash() {
+        // `cd /some/path && git status` should match a policy for `git`
+        let input = serde_json::json!({"command": "cd /Users/me/code && git status"});
+        let ctx = QueryContext::from_tool("Bash", &input);
+        assert_eq!(ctx.args[0], "git");
+        assert_eq!(ctx.args[1], "status");
+
+        // Multiple path segments
+        let input2 = serde_json::json!({"command": "cd /tmp && cargo build --release"});
+        let ctx2 = QueryContext::from_tool("Bash", &input2);
+        assert_eq!(ctx2.args[0], "cargo");
+        assert_eq!(ctx2.args[1], "build");
+
+        // cd without && should NOT be stripped (it's a standalone cd)
+        let input3 = serde_json::json!({"command": "cd /tmp"});
+        let ctx3 = QueryContext::from_tool("Bash", &input3);
+        assert_eq!(ctx3.args[0], "cd");
+
+        // ./gradlew after cd should normalize to gradlew
+        let input4 = serde_json::json!({"command": "cd /Users/me/code && ./gradlew build"});
+        let ctx4 = QueryContext::from_tool("Bash", &input4);
+        assert_eq!(ctx4.args[0], "gradlew");
+        assert_eq!(ctx4.args[1], "build");
+    }
+
+    #[test]
+    fn bin_path_normalized_to_filename() {
+        // ./binary → binary
+        let input = serde_json::json!({"command": "./gradlew test"});
+        let ctx = QueryContext::from_tool("Bash", &input);
+        assert_eq!(ctx.args[0], "gradlew");
+
+        // /usr/bin/git → git
+        let input2 = serde_json::json!({"command": "/usr/bin/git status"});
+        let ctx2 = QueryContext::from_tool("Bash", &input2);
+        assert_eq!(ctx2.args[0], "git");
+
+        // plain binary unchanged
+        let input3 = serde_json::json!({"command": "cargo build"});
+        let ctx3 = QueryContext::from_tool("Bash", &input3);
+        assert_eq!(ctx3.args[0], "cargo");
     }
 
     #[test]
